@@ -11,7 +11,8 @@ jQuery(function () {
 
         function parse_text(data) {
             var pars_current = data.parse.text["*"];
-            console.log("----------------", pars_current);
+            var split_in_string = "";
+            // console.log("----------------", pars_current);
             var blurb = $("<div></div>").html(pars_current);
             //remove links as they will not work
             blurb.find("a").each(function () {
@@ -21,7 +22,13 @@ jQuery(function () {
             blurb.find("sup").remove();
             //remove  cite error
             blurb.find(".mw-ext-cite-error").remove();
-            $("#article").html($(blurb).find("p"));
+            var text = $(blurb).find("p");
+            $("#article").html(text);
+            for (var j = 0; j < text.length; j++) {
+                split_in_string = text[j].innerText.split(/\n/);
+                console.log("----",split_in_string);
+            }
+
         };
 
         $.ajax({
@@ -39,30 +46,25 @@ jQuery(function () {
                      } */
                 //console.log(data);
                 var markup = data.parse.sections;
-                console.log(markup);
-                for (var i = 0; i < markup.length; i++) {
-                    console.log(markup[i].line);
-                    if (markup[i].line !== "Biografie") {
-                        console.log(markup[i], "i=", i);
-                        //need to parse through all sections
+                // console.log(markup);
+                //for (var i = 0; i < markup.length; i++) {
+                for (var i = 0; i < 1; i++) {
+                    // console.log(markup[i].line);
+                    // console.log(markup[i], "i=", i);
+                    $.ajax({
+                        type: "GET",
+                        url: "http://de.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=" + i + 1 + "&page=" + searchTerm + "&callback=?",
+                        async: false,
+                        dataType: "json",
+                        success: function (data1) {
+                            parse_text(data1)
+                        },
+                        error: function (errorMessage) {
+                            alert(errorMessage);
+                        }
+                    });
 
-                    } else {
-                        console.log("Biografie section is found.");
-                        console.log(markup[i], "i=", i);
-                        $.ajax({
-                            type: "GET",
-                            url: "http://de.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=" + i + 1 + "&page=" + searchTerm + "&callback=?",
-                            async: false,
-                            dataType: "json",
-                            success: function (data1) {
-                                parse_text(data1)
-                            },
-                            error: function (errorMessage) {
-                                alert(errorMessage);
-                            }
-                        });
-                        break;
-                    }
+
                 }
             },
             error: function (errorMessage) {
